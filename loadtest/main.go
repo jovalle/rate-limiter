@@ -7,6 +7,7 @@ import (
 	"io"
 	"net/http"
 	"os"
+	"strings"
 	"sync"
 	"sync/atomic"
 	"time"
@@ -138,12 +139,20 @@ func printResults(results LoadTestResults) {
 	fmt.Println("Load Test Results:")
 	fmt.Println("==================")
 	fmt.Printf("Total Requests:     %d\n", results.TotalRequests)
-	fmt.Printf("Success:            %d (%.2f%%)\n", results.SuccessRequests, 
-		float64(results.SuccessRequests)/float64(results.TotalRequests)*100)
-	fmt.Printf("Failed:             %d (%.2f%%)\n", results.FailedRequests,
-		float64(results.FailedRequests)/float64(results.TotalRequests)*100)
-	fmt.Printf("Rate Limited:       %d (%.2f%%)\n", results.RateLimited,
-		float64(results.RateLimited)/float64(results.TotalRequests)*100)
+	
+	if results.TotalRequests > 0 {
+		fmt.Printf("Success:            %d (%.2f%%)\n", results.SuccessRequests, 
+			float64(results.SuccessRequests)/float64(results.TotalRequests)*100)
+		fmt.Printf("Failed:             %d (%.2f%%)\n", results.FailedRequests,
+			float64(results.FailedRequests)/float64(results.TotalRequests)*100)
+		fmt.Printf("Rate Limited:       %d (%.2f%%)\n", results.RateLimited,
+			float64(results.RateLimited)/float64(results.TotalRequests)*100)
+	} else {
+		fmt.Printf("Success:            %d\n", results.SuccessRequests)
+		fmt.Printf("Failed:             %d\n", results.FailedRequests)
+		fmt.Printf("Rate Limited:       %d\n", results.RateLimited)
+	}
+	
 	fmt.Printf("Duration:           %s\n", results.Duration)
 	fmt.Printf("Requests/sec:       %.2f\n", results.RequestsPerSec)
 }
@@ -177,7 +186,7 @@ func validateMetrics(metricsURL string) {
 
 	allFound := true
 	for _, metric := range expectedMetrics {
-		if !contains(metricsBody, metric) {
+		if !strings.Contains(metricsBody, metric) {
 			fmt.Printf("Missing expected metric: %s\n", metric)
 			allFound = false
 		}
@@ -190,8 +199,4 @@ func validateMetrics(metricsURL string) {
 		fmt.Println("✗ Metrics validation failed")
 		os.Exit(1)
 	}
-}
-
-func contains(s, substr string) bool {
-	return len(s) >= len(substr) && (s == substr || len(s) > len(substr) && (s[:len(substr)] == substr || contains(s[1:], substr)))
 }

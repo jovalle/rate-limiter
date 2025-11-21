@@ -30,6 +30,7 @@ FROM ubuntu:22.04
 # Install minimal runtime dependencies
 RUN apt-get update && apt-get install -y \
     ca-certificates \
+    curl \
     && rm -rf /var/lib/apt/lists/*
 
 # Create non-root user for security
@@ -53,7 +54,7 @@ EXPOSE 8080
 
 # Health check
 HEALTHCHECK --interval=30s --timeout=3s --start-period=5s --retries=3 \
-    CMD ["/usr/bin/curl", "-f", "http://localhost:8080/health", "||", "exit", "1"]
+    CMD curl -f http://localhost:8080/health || exit 1
 
 # Note: Running as non-root requires CAP_NET_ADMIN and CAP_SYS_ADMIN capabilities
 # These are granted via Kubernetes security context or docker run --cap-add

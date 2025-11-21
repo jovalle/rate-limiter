@@ -22,7 +22,7 @@ spec:
       dnsPolicy: ClusterFirstWithHostNet
       containers:
       - name: rate-limiter
-        image: rate-limiter:latest
+        image: rate-limiter:v1.0.0
         imagePullPolicy: IfNotPresent
         envFrom:
         - configMapRef:
