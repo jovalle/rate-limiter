@@ -98,6 +98,18 @@ func serveMetrics() *Metrics {
 	promHandler := promhttp.HandlerFor(reg, promhttp.HandlerOpts{})
 	pMux.Handle("/metrics", promHandler)
 
+	// Health check endpoint
+	pMux.HandleFunc("/health", func(w http.ResponseWriter, r *http.Request) {
+		w.WriteHeader(http.StatusOK)
+		w.Write([]byte("OK"))
+	})
+
+	// Readiness check endpoint
+	pMux.HandleFunc("/ready", func(w http.ResponseWriter, r *http.Request) {
+		w.WriteHeader(http.StatusOK)
+		w.Write([]byte("READY"))
+	})
+
 	go func() {
 		log.Fatal(http.ListenAndServe(":8080", pMux))
 	}()

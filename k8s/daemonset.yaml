@@ -1,0 +1,68 @@
+apiVersion: apps/v1
+kind: DaemonSet
+metadata:
+  name: rate-limiter
+  namespace: rate-limiter
+  labels:
+    app: rate-limiter
+spec:
+  selector:
+    matchLabels:
+      app: rate-limiter
+  template:
+    metadata:
+      labels:
+        app: rate-limiter
+      annotations:
+        prometheus.io/scrape: "true"
+        prometheus.io/port: "8080"
+        prometheus.io/path: "/metrics"
+    spec:
+      hostNetwork: true
+      dnsPolicy: ClusterFirstWithHostNet
+      containers:
+      - name: rate-limiter
+        image: rate-limiter:latest
+        imagePullPolicy: IfNotPresent
+        envFrom:
+        - configMapRef:
+            name: rate-limiter-config
+        ports:
+        - name: metrics
+          containerPort: 8080
+          protocol: TCP
+        livenessProbe:
+          httpGet:
+            path: /health
+            port: metrics
+          initialDelaySeconds: 10
+          periodSeconds: 30
+          timeoutSeconds: 3
+          failureThreshold: 3
+        readinessProbe:
+          httpGet:
+            path: /ready
+            port: metrics
+          initialDelaySeconds: 5
+          periodSeconds: 10
+          timeoutSeconds: 3
+          failureThreshold: 3
+        resources:
+          requests:
+            memory: "128Mi"
+            cpu: "100m"
+          limits:
+            memory: "512Mi"
+            cpu: "1000m"
+        securityContext:
+          # Required for XDP/eBPF operations
+          privileged: true
+          capabilities:
+            add:
+            - NET_ADMIN
+            - SYS_ADMIN
+            - BPF
+      tolerations:
+      # Allow scheduling on all nodes including control plane
+      - effect: NoSchedule
+        operator: Exists
