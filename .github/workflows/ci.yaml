@@ -32,7 +32,7 @@ jobs:
         sudo apt-get install -y libbpf-dev libelf-dev clang llvm pkg-config
 
     - name: Cache Go modules
-      uses: actions/cache@v3
+      uses: actions/cache@v4
       with:
         path: ~/go/pkg/mod
         key: ${{ runner.os }}-go-${{ hashFiles('**/go.sum') }}
@@ -49,7 +49,7 @@ jobs:
       run: go test -v -race -coverprofile=coverage.out -covermode=atomic ./...
 
     - name: Upload coverage to Codecov
-      uses: codecov/codecov-action@v3
+      uses: codecov/codecov-action@v4
       with:
         files: ./coverage.out
         flags: unittests
@@ -73,7 +73,7 @@ jobs:
         sudo apt-get install -y libbpf-dev libelf-dev clang llvm pkg-config
 
     - name: golangci-lint
-      uses: golangci/golangci-lint-action@v3
+      uses: golangci/golangci-lint-action@v4
       with:
         version: latest
         args: --timeout=5m
@@ -103,7 +103,7 @@ jobs:
       run: go build -v -o rate-limiter .
 
     - name: Upload artifact
-      uses: actions/upload-artifact@v3
+      uses: actions/upload-artifact@v4
       with:
         name: rate-limiter
         path: rate-limiter
@@ -174,7 +174,7 @@ jobs:
       run: helm package helm/rate-limiter
 
     - name: Upload Helm chart
-      uses: actions/upload-artifact@v3
+      uses: actions/upload-artifact@v4
       with:
         name: helm-chart
         path: rate-limiter-*.tgz
