@@ -56,6 +56,12 @@ func main() {
 	fmt.Printf("  Metrics URL: %s\n", config.MetricsURL)
 	fmt.Println()
 
+	// Validate configuration
+	if config.RequestsPerSec <= 0 {
+		fmt.Fprintf(os.Stderr, "Error: RequestsPerSec must be greater than 0\n")
+		os.Exit(1)
+	}
+
 	results := runLoadTest(config)
 	printResults(results)
 
@@ -130,7 +136,9 @@ func runLoadTest(config LoadTestConfig) LoadTestResults {
 	wg.Wait()
 
 	results.Duration = time.Since(startTime)
-	results.RequestsPerSec = float64(results.TotalRequests) / results.Duration.Seconds()
+	if results.Duration.Seconds() > 0 {
+		results.RequestsPerSec = float64(results.TotalRequests) / results.Duration.Seconds()
+	}
 
 	return results
 }
