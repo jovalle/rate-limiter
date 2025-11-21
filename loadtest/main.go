@@ -76,10 +76,6 @@ func runLoadTest(config LoadTestConfig) LoadTestResults {
 	var wg sync.WaitGroup
 
 	// Calculate delay between requests for rate limiting
-	// RequestsPerSec is validated in main() to be > 0
-	if config.RequestsPerSec <= 0 {
-		config.RequestsPerSec = 1 // Safety fallback
-	}
 	delayBetweenRequests := time.Second / time.Duration(config.RequestsPerSec)
 
 	startTime := time.Now()
@@ -153,9 +149,10 @@ func printResults(results LoadTestResults) {
 	fmt.Printf("Total Requests:     %d\n", results.TotalRequests)
 	
 	if results.TotalRequests > 0 {
-		successPct := float64(results.SuccessRequests) / float64(results.TotalRequests) * 100
-		failedPct := float64(results.FailedRequests) / float64(results.TotalRequests) * 100
-		rateLimitedPct := float64(results.RateLimited) / float64(results.TotalRequests) * 100
+		totalFloat := float64(results.TotalRequests)
+		successPct := float64(results.SuccessRequests) / totalFloat * 100
+		failedPct := float64(results.FailedRequests) / totalFloat * 100
+		rateLimitedPct := float64(results.RateLimited) / totalFloat * 100
 		
 		fmt.Printf("Success:            %d (%.2f%%)\n", results.SuccessRequests, successPct)
 		fmt.Printf("Failed:             %d (%.2f%%)\n", results.FailedRequests, failedPct)

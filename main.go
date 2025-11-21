@@ -101,13 +101,17 @@ func serveMetrics() *Metrics {
 	// Health check endpoint
 	pMux.HandleFunc("/health", func(w http.ResponseWriter, r *http.Request) {
 		w.WriteHeader(http.StatusOK)
-		w.Write([]byte("OK"))
+		if _, err := w.Write([]byte("OK")); err != nil {
+			log.Errorf("Failed to write health response: %v", err)
+		}
 	})
 
 	// Readiness check endpoint
 	pMux.HandleFunc("/ready", func(w http.ResponseWriter, r *http.Request) {
 		w.WriteHeader(http.StatusOK)
-		w.Write([]byte("READY"))
+		if _, err := w.Write([]byte("READY")); err != nil {
+			log.Errorf("Failed to write ready response: %v", err)
+		}
 	})
 
 	go func() {
