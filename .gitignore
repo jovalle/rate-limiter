@@ -2,3 +2,25 @@
 rate-limiter
 .vscode/*
 .idea/*
+
+# Build artifacts
+rate_limiter_bpfeb.o
+rate_limiter_bpfel.o
+*.test
+*.out
+coverage.out
+
+# Dependency directories
+vendor/
+node_modules/
+
+# IDE
+.vscode/
+.idea/
+
+# OS files
+.DS_Store
+Thumbs.db
+
+# Test artifacts
+/tmp/

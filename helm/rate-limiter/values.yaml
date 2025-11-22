@@ -1,0 +1,98 @@
+# Default values for rate-limiter
+replicaCount: 1
+
+image:
+  repository: rate-limiter
+  pullPolicy: IfNotPresent
+  # Overrides the image tag whose default is the chart appVersion
+  tag: ""
+
+imagePullSecrets: []
+nameOverride: ""
+fullnameOverride: ""
+
+# Rate limiter configuration
+config:
+  interface: "eth0"
+  logLevel: "info"
+  # eBPF rate limiting parameters (set at build time in main.go)
+  # PACKET_BURST_LIMIT: 10000
+  # PACKETS_PER_SECOND: 3200
+  # PACKET_BURST_REPLENISH_SECONDS: 600
+
+# Service configuration
+service:
+  type: ClusterIP
+  port: 8080
+  annotations: {}
+
+# ServiceMonitor for Prometheus Operator
+serviceMonitor:
+  enabled: true
+  interval: 15s
+  scrapeTimeout: 10s
+
+# Pod configuration
+podAnnotations:
+  prometheus.io/scrape: "true"
+  prometheus.io/port: "8080"
+  prometheus.io/path: "/metrics"
+
+podSecurityContext: {}
+
+securityContext:
+  privileged: true
+  capabilities:
+    add:
+    - NET_ADMIN
+    - SYS_ADMIN
+    - BPF
+
+# Resource limits and requests
+resources:
+  requests:
+    memory: "128Mi"
+    cpu: "100m"
+  limits:
+    memory: "512Mi"
+    cpu: "1000m"
+
+# Use DaemonSet to run on all nodes
+useDaemonSet: true
+
+# Node selector
+nodeSelector: {}
+
+# Tolerations to allow scheduling on all nodes
+tolerations:
+  - effect: NoSchedule
+    operator: Exists
+
+# Affinity rules
+affinity: {}
+
+# Use host network for XDP attachment
+hostNetwork: true
+
+# DNS policy when using host network
+dnsPolicy: ClusterFirstWithHostNet
+
+# Liveness probe configuration
+livenessProbe:
+  httpGet:
+    path: /health
+    port: 8080
+  initialDelaySeconds: 10
+  periodSeconds: 30
+  timeoutSeconds: 3
+  failureThreshold: 3
+
+# Readiness probe configuration
+readinessProbe:
+  httpGet:
+    path: /ready
+    port: 8080
+  initialDelaySeconds: 5
+  periodSeconds: 10
+  timeoutSeconds: 3
+  failureThreshold: 3
